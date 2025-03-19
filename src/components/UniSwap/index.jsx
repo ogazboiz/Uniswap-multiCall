@@ -273,7 +273,7 @@ const UniswapV2 = () => {
           <div className="inline-block relative mb-2">
             <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 to-indigo-500 rounded-lg blur opacity-75 animate-pulse"></div>
             <h1 className="relative px-6 py-3 bg-slate-900 bg-opacity-90 rounded-lg text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400">
-              Uniswap V2 Explorer
+              Uniswap V2 Explorer (Ogazboiz)
             </h1>
           </div>
           <p className="text-gray-300 mt-2">Explore liquidity pools and token details on Uniswap V2</p>
@@ -377,7 +377,7 @@ const UniswapV2 = () => {
 
         {/* Footer */}
         <div className="mt-10 text-center text-gray-500 text-sm">
-          <p>Powered by Ethereum & Uniswap V2</p>
+          <p>Powered by Ogazboiz</p>
         </div>
       </div>
 
