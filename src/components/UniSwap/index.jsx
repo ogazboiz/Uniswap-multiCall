@@ -52,7 +52,8 @@ const UniswapV2 = () => {
     }
   }, [])
 
-  // Generate share link when pair data is loaded
+  
+
   useEffect(() => {
     if (pairAddress && token0Details.symbol && token1Details.symbol) {
       const url = new URL(window.location.href)
@@ -60,6 +61,44 @@ const UniswapV2 = () => {
       setShareLink(url.toString())
     }
   }, [pairAddress, token0Details, token1Details])
+
+  const tokenInfo = async (tokenAddress) => {
+    try {
+      const provider = getReadOnlyProvider()
+
+      const multiCallContractABI = (await import("../../ABI/multicall.json")).default
+      const tokenABI = (await import("../../ABI/erc20.json")).default
+
+      const multiCallContract = new ethers.Contract(multiCallContractAddress, multiCallContractABI, provider)
+      const tokenContract = new ethers.Contract(tokenAddress, tokenABI, provider)
+
+      const calls = [
+        {
+          target: tokenAddress,
+          callData: tokenContract.interface.encodeFunctionData("name", []),
+        },
+        {
+          target: tokenAddress,
+          callData: tokenContract.interface.encodeFunctionData("symbol", []),
+        },
+        {
+          target: tokenAddress,
+          callData: tokenContract.interface.encodeFunctionData("decimals", []),
+        },
+      ]
+
+      const [blockNumber, returnData] = await multiCallContract.aggregate.staticCall(calls)
+
+      const name = tokenContract.interface.decodeFunctionResult("name", returnData[0])[0]
+      const symbol = tokenContract.interface.decodeFunctionResult("symbol", returnData[1])[0]
+      const decimals = tokenContract.interface.decodeFunctionResult("decimals", returnData[2])[0]
+
+      return { name, symbol, decimals }
+    } catch (error) {
+      console.error("Error fetching token details:", error)
+      return { name: "N/A", symbol: "N/A", decimals: "18" }
+    }
+  }
 
   const getPairData = async (address = pairAddress) => {
     if (!address) {
@@ -104,8 +143,9 @@ const UniswapV2 = () => {
       ]
 
       const [blockNumber, returnData] = await multiCallContract.aggregate.staticCall(calls)
-
+      console.log("resultData :", returnData)
       const token0Address = pairContract.interface.decodeFunctionResult("token0", returnData[0])[0]
+      console.log("token address 0", token0Address)
       const token1Address = pairContract.interface.decodeFunctionResult("token1", returnData[1])[0]
 
       const reserves = pairContract.interface.decodeFunctionResult("getReserves", returnData[2])
@@ -117,13 +157,12 @@ const UniswapV2 = () => {
       setReserve1(reserves[1].toString())
       setTotalSupply(totalSupply.toString())
 
-      const token0Details = await tokenDetails(token0Address)
-      const token1Details = await tokenDetails(token1Address)
+      const token0Details = await tokenInfo(token0Address)
+      const token1Details = await tokenInfo(token1Address)
 
       setToken0Details(token0Details)
       setToken1Details(token1Details)
 
-      // Save to recent pairs
       saveToRecentPairs(address, token0Details.symbol, token1Details.symbol)
     } catch (error) {
       console.error("Error fetching pair data:", error)
@@ -140,50 +179,14 @@ const UniswapV2 = () => {
       timestamp: Date.now(),
     }
 
-    // Add to recent pairs, remove duplicates, and keep only the last 5
+
     const updatedPairs = [pairInfo, ...recentPairs.filter((pair) => pair.address !== address)].slice(0, 5)
 
     setRecentPairs(updatedPairs)
     localStorage.setItem("recentPairs", JSON.stringify(updatedPairs))
   }
 
-  const tokenDetails = async (tokenAddress) => {
-    try {
-      const provider = getReadOnlyProvider()
-
-      const multiCallContractABI = (await import("../../ABI/multicall.json")).default
-      const tokenABI = (await import("../../ABI/erc20.json")).default
-
-      const multiCallContract = new ethers.Contract(multiCallContractAddress, multiCallContractABI, provider)
-      const tokenContract = new ethers.Contract(tokenAddress, tokenABI, provider)
-
-      const calls = [
-        {
-          target: tokenAddress,
-          callData: tokenContract.interface.encodeFunctionData("name", []),
-        },
-        {
-          target: tokenAddress,
-          callData: tokenContract.interface.encodeFunctionData("symbol", []),
-        },
-        {
-          target: tokenAddress,
-          callData: tokenContract.interface.encodeFunctionData("decimals", []),
-        },
-      ]
-
-      const [blockNumber, returnData] = await multiCallContract.aggregate.staticCall(calls)
-
-      const name = tokenContract.interface.decodeFunctionResult("name", returnData[0])[0]
-      const symbol = tokenContract.interface.decodeFunctionResult("symbol", returnData[1])[0]
-      const decimals = tokenContract.interface.decodeFunctionResult("decimals", returnData[2])[0]
-
-      return { name, symbol, decimals }
-    } catch (error) {
-      console.error("Error fetching token details:", error)
-      return { name: "N/A", symbol: "N/A", decimals: "18" }
-    }
-  }
+  
 
   const copyToClipboard = (text, type) => {
     navigator.clipboard.writeText(text)

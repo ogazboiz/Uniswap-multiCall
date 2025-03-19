@@ -1,4 +1,4 @@
-"use client"
+
 
 import { formatAddress } from "../../utils/format"
 

@@ -91,15 +91,16 @@ const TabsContainer = ({
       )}
 
       {activeTab === "swap" && (
-        <SwapCalculatorTab
-          token0={token0}
-          token1={token1}
-          token0Details={token0Details}
-          token1Details={token1Details}
-          reserve0={reserve0}
-          reserve1={reserve1}
-          prices={prices}
-        />
+        // <SwapCalculatorTab
+        //   token0={token0}
+        //   token1={token1}
+        //   token0Details={token0Details}
+        //   token1Details={token1Details}
+        //   reserve0={reserve0}
+        //   reserve1={reserve1}
+        //   prices={prices}
+        // />
+        <h1>coming soon</h1>
       )}
 
       {activeTab === "calculator" && (

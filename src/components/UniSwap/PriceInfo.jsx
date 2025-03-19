@@ -1,4 +1,4 @@
-"use client"
+
 
 const PriceInfo = ({ token0Details, token1Details, prices }) => {
   return (
